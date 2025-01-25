@@ -1,0 +1,43 @@
+Hi bro \m/ We want to create a new MCP server called "claudeus-plane-mcp" in our servers directory here.
+We want to use the architecture, quality, logic and standards in "claudeus-wp-mcp".
+It should be able to connect to our Plane API and have full access to do any operations on the Plane API.
+Check the Docs and become an expert MCP development and Plane and it's API.
+When you're ready with all the knowledge, information and the parameters you need, start building the server gradually, adding unit tests and documentation to each feature we create or modify.
+
+Claudeus Plane MCP server mst be able to:
+- Connects to SimHop's Plane API endpoint and authenticate with the proper method and credentials.
+- Get lists of all projects, tasks, users, and comments (including comments filtered by task, project, or user).
+- Update all the resources (projects, tasks, users, and comments) with the proper methods and credentials.
+- Delete all the resources (projects, tasks, users, and comments) with the proper methods and credentials.
+- Create all the resources (projects, tasks, users, and comments) with the proper methods and credentials.
+
+In short, Claudeus Plane MCP server must be able to do any operation on the Plane API and manipulate ANYTHING on the target Plane instance! It's like a Plane Wizard that can do anything! 😁
+
+Just like the Claudeus WP MCP server, it should have a configuration file that contains as many targets as needed, each target has the base URL (required), the slug of the default workspace (required), an array of other workspaces (optional) and the API key X_API_Key (required).
+
+
+Plane instance: https://ops.simhop.se
+Base URL: https://ops.simhop.se/api/v1
+Default Workspace: "deuspace"
+Authentication Header:
+X-API-Key: "plane_api_e876aa94ae9a40b58c8d573c983b3515"
+
+Example of a CRUD endpoints to get all projects:
+GET     {base-url}/workspaces/{workspace-slug}/projects/
+GET     {base-url}/workspaces/{workspace-slug}/projects/{project-id}
+
+POST    {base-url}/workspaces/{workspace-slug}/projects/
+body = {
+  "name": "<string>",
+  "identifier": "<string>",
+  "description": "<string>"
+}
+
+PATCH   {base-url}/workspaces/{workspace-slug}/projects/{project-id}
+body = {
+  "description": "<string>"
+}
+
+DELETE  {base-url}/workspaces/{workspace-slug}/projects/{project-id}
+
+
