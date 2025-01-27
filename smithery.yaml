@@ -1,0 +1,122 @@
+# Smithery.ai configuration for Claudeus Plane MCP
+name: "Claudeus Plane MCP"
+description: "AI-powered Plane project management with MCP protocol support"
+version: "1.0.0"
+author:
+  name: "Amadeus Samiel H."
+  email: "amadeus.hritani@simhop.se"
+organization:
+  name: "SimHop IT & Media AB"
+  website: "https://simhop.se"
+
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    properties:
+      PLANE_INSTANCES_PATH:
+        type: string
+        description: "Path to Plane instances configuration JSON file"
+        default: "./plane-instances.json"
+        examples: ["./plane-instances.json", "/app/config/plane-instances.json"]
+      PORT:
+        type: number
+        description: "Port number for the MCP server (for health checks)"
+        default: 3000
+        minimum: 1024
+        maximum: 65535
+      NODE_ENV:
+        type: string
+        description: "Node environment (development/production)"
+        enum: ["development", "production"]
+        default: "production"
+      DEBUG:
+        type: string
+        description: "Debug configuration pattern"
+        default: "claudeus:*"
+        examples: ["claudeus:*", "claudeus:plane,claudeus:mcp"]
+      AUTH_TYPE:
+        type: string
+        description: "Default Plane authentication type"
+        enum: ["api_key"]
+        default: "api_key"
+      SSL_VERIFY:
+        type: boolean
+        description: "Verify SSL certificates for Plane connections"
+        default: true
+      LOG_LEVEL:
+        type: string
+        description: "Logging level"
+        enum: ["error", "warn", "info", "debug"]
+        default: "info"
+      BATCH_SIZE:
+        type: number
+        description: "Maximum number of items to process in a batch"
+        default: 100
+        minimum: 1
+        maximum: 1000
+    additionalProperties: false
+
+  commandFunction: |-
+    (config) => {
+      // Ensure configuration files exist
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Helper function to copy example if target doesn't exist
+      const copyExampleIfNeeded = (examplePath, targetPath) => {
+        if (!fs.existsSync(targetPath) && fs.existsSync(examplePath)) {
+          fs.copyFileSync(examplePath, targetPath);
+        }
+      };
+
+      // Copy example files if needed
+      copyExampleIfNeeded('plane-instances.json.example', 'plane-instances.json');
+      copyExampleIfNeeded('.env.example', '.env');
+
+      const env = {
+        PLANE_INSTANCES_PATH: config.PLANE_INSTANCES_PATH || "./plane-instances.json",
+        PORT: config.PORT?.toString() || "3000",
+        NODE_ENV: config.NODE_ENV || "production",
+        DEBUG: config.DEBUG || "claudeus:*",
+        AUTH_TYPE: config.AUTH_TYPE || "api_key",
+        SSL_VERIFY: (config.SSL_VERIFY ?? true).toString(),
+        LOG_LEVEL: config.LOG_LEVEL || "info",
+        BATCH_SIZE: config.BATCH_SIZE?.toString() || "100",
+        MCP_STDIO: "true"
+      };
+
+      return {
+        command: "node",
+        args: ["dist/index.js"],
+        env,
+        cwd: process.cwd()
+      };
+    }
+
+capabilities:
+  prompts:
+    listChanged: true
+  tools:
+    listChanged: true
+  resources:
+    listChanged: true
+
+security:
+  userConsent:
+    required: true
+    description: "This MCP server requires access to your Plane instances and will perform project management operations."
+  dataAccess:
+    - type: "plane"
+      description: "Access to configured Plane instances via REST API"
+    - type: "filesystem"
+      description: "Access to plane-instances.json configuration file"
+  toolSafety:
+    confirmationRequired: true
+    description: "Tools can modify Plane projects, issues, and settings"
+    dangerousOperations:
+      - "delete_project"
+      - "delete_issue"
+      - "delete_cycle"
+      - "delete_module"
+      - "delete_workspace" 

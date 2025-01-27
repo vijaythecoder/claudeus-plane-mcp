@@ -1,0 +1,8 @@
+{
+  "your_plane_instance_1": {
+    "baseUrl": "https://ops.your-domain.se/api/v1",
+    "defaultWorkspace": "your-workspace",
+    "otherWorkspaces": ["client1workspace", "client2workspace"],
+    "apiKey": "your-plane-api-key"
+  }
+} 

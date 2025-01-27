@@ -1,5 +1,5 @@
-Hi bro \m/ We want to create a new MCP server called "claudeus-plane-mcp" in our servers directory here.
-We want to use the architecture, quality, logic and standards in "claudeus-wp-mcp".
+
+We want to use the architecture, quality, logic and standards in "/Users/amadeus/code/claudeus/servers/claudeus-wp-mcp".
 It should be able to connect to our Plane API and have full access to do any operations on the Plane API.
 Check the Docs and become an expert MCP development and Plane and it's API.
 When you're ready with all the knowledge, information and the parameters you need, start building the server gradually, adding unit tests and documentation to each feature we create or modify.

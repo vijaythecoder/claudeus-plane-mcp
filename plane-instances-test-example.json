@@ -1,0 +1,8 @@
+{
+  "your_plane_instance_1_test": {
+    "baseUrl": "https://ops.your-domain.se/api/v1",
+    "defaultWorkspace": "claudeus-test-framework",
+    "otherWorkspaces": [],
+    "apiKey": "your-plane-api-key"
+  }
+}
