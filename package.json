@@ -4,7 +4,7 @@
   "description": "Model Context Protocol server for Plane integration",
   "license": "MIT",
   "private": false,
-  "author": "SimHop IT & Media AB",
+  "author": "Amadeus Samiel H.",
   "homepage": "https://simhop.se",
   "bugs": "https://github.com/deus-h/claudeus-plane-mcp/discussions",
   "type": "module",
