@@ -1,5 +1,5 @@
 import { EventEmitter } from 'events';
-import dummyProjects from '@/dummy-data/projects.json' assert { type: 'json' };
+import dummyProjects from '@/dummy-data/projects.json' with { type: 'json' };
 
 export interface MCPContentItem {
   type: string;

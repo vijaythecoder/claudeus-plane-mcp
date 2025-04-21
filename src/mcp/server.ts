@@ -38,9 +38,9 @@ export class McpServer {
   private connections: Map<string, Connection> = new Map();
   private nextConnectionId = 1;
   private capabilities = {
-    prompts: { listChanged: true },
-    tools: { listChanged: true },
-    resources: { listChanged: true }
+    prompts: { list: true, execute: true, listChanged: true },
+    tools: { list: true, call: true, listChanged: true },
+    resources: { list: true, read: true, listChanged: true }
   };
   private registeredPrompts: PromptDefinition[] = [];
 

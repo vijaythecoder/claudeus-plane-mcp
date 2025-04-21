@@ -42,11 +42,30 @@ export class ListProjectsTool implements Tool {
     async execute(args: Record<string, unknown>): Promise<ToolResponse> {
         try {
             const input = zodInputSchema.parse(args);
-            const workspace = input.workspace_slug || this.client.instance.defaultWorkspace;
+            const requestedWorkspace = input.workspace_slug;
+            const defaultWorkspace = this.client.instance.defaultWorkspace;
+            
+            // If a specific workspace was requested but it's not the default and not in otherWorkspaces
+            if (requestedWorkspace && 
+                requestedWorkspace !== defaultWorkspace && 
+                !this.client.instance.otherWorkspaces?.includes(requestedWorkspace)) {
+                
+                // Provide a helpful error message with available workspaces
+                const availableWorkspaces = [defaultWorkspace, ...(this.client.instance.otherWorkspaces || [])];
+                return {
+                    isError: true,
+                    content: [{
+                        type: 'text',
+                        text: `Error: Workspace "${requestedWorkspace}" is not available. Available workspaces: ${availableWorkspaces.join(', ')}`
+                    }]
+                };
+            }
+            
+            const workspace = requestedWorkspace || defaultWorkspace;
 
             this.client.notify({
                 type: 'info',
-                message: 'Fetching projects',
+                message: `Fetching projects from workspace: ${workspace}`,
                 source: this.name,
                 data: {}
             });
@@ -56,7 +75,7 @@ export class ListProjectsTool implements Tool {
 
             this.client.notify({
                 type: 'success',
-                message: `Successfully retrieved ${projects.length} projects`,
+                message: `Successfully retrieved ${projects.length} projects from workspace: ${workspace}`,
                 source: this.name,
                 data: {
                     workspace,
@@ -68,14 +87,23 @@ export class ListProjectsTool implements Tool {
                 isError: false,
                 content: [{
                     type: 'text',
-                    text: `Successfully retrieved ${projects.length} projects: ${JSON.stringify(projects)}`
+                    text: `Successfully retrieved ${projects.length} projects from workspace "${workspace}": ${JSON.stringify(projects)}`
                 }]
             };
         } catch (error) {
             const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+            
+            // Provide more context in the error message
+            let detailedErrorMessage = errorMessage;
+            if (errorMessage.includes('404')) {
+                const defaultWorkspace = this.client.instance.defaultWorkspace;
+                const availableWorkspaces = [defaultWorkspace, ...(this.client.instance.otherWorkspaces || [])];
+                detailedErrorMessage = `${errorMessage}\nAvailable workspaces: ${availableWorkspaces.join(', ')}`;
+            }
+            
             this.client.notify({
                 type: 'error',
-                message: `Failed to list projects: ${errorMessage}`,
+                message: `Failed to list projects: ${detailedErrorMessage}`,
                 source: this.name,
                 data: {
                     error: errorMessage
@@ -86,7 +114,7 @@ export class ListProjectsTool implements Tool {
                 isError: true,
                 content: [{
                     type: 'text',
-                    text: `Failed to list projects: ${errorMessage}`
+                    text: `Failed to list projects: ${detailedErrorMessage}`
                 }]
             };
         }

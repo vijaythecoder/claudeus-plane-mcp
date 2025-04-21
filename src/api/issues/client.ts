@@ -20,18 +20,37 @@ export class IssuesClient extends BaseApiClient {
     projectId: string,
     filters?: IssueListFilters,
     page: number = 1,
-    pageSize: number = 100
+    per_page: number = 100
   ): Promise<IssueListResponse> {
     const queryParams = {
-      offset: ((page - 1) * pageSize).toString(), // Plane uses offset-based pagination
-      limit: pageSize.toString(),
+      offset: ((page - 1) * per_page).toString(), // Plane uses offset-based pagination
+      per_page: per_page.toString(),
       ...filters
     };
 
-    return this.get(
-      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues`,
-      queryParams
-    );
+    // Log the request URL for debugging
+    console.error(`[DEBUG] Requesting issues from: ${this.baseUrl}/workspaces/${workspaceSlug}/projects/${projectId}/issues`);
+    console.error(`[DEBUG] With params: ${JSON.stringify(queryParams)}`);
+    console.error(`[DEBUG] Using API key: ${this._instance?.apiKey ? (this._instance.apiKey.substring(0, 10) + '...') : 'undefined'}`);
+    console.error(`[DEBUG] Workspace: ${workspaceSlug}, Project ID: ${projectId}`);
+
+    try {
+      return this.get(
+        `/workspaces/${workspaceSlug}/projects/${projectId}/issues/`,
+        queryParams
+      );
+    } catch (error) {
+      console.error(`[ERROR] Failed to get issues: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Add more context to the error message
+      if (error instanceof Error) {
+        const enhancedError = new Error(`Failed to list issues for project ${projectId} in workspace ${workspaceSlug}: ${error.message}`);
+        enhancedError.stack = error.stack;
+        throw enhancedError;
+      }
+      
+      throw error;
+    }
   }
 
   /**
@@ -45,14 +64,28 @@ export class IssuesClient extends BaseApiClient {
     projectId: string,
     data: CreateIssueData
   ): Promise<IssueResponse> {
-    return this.post(
-      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues`,
-      {
-        ...data,
-        project: projectId,
-        workspace: workspaceSlug
+    try {
+      console.error(`[DEBUG] Creating issue in project ${projectId} in workspace ${workspaceSlug}`);
+      return this.post(
+        `/workspaces/${workspaceSlug}/projects/${projectId}/issues/`,
+        {
+          ...data,
+          project: projectId,
+          workspace: workspaceSlug
+        }
+      );
+    } catch (error) {
+      console.error(`[ERROR] Failed to create issue: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Add more context to the error message
+      if (error instanceof Error) {
+        const enhancedError = new Error(`Failed to create issue in project ${projectId} in workspace ${workspaceSlug}: ${error.message}`);
+        enhancedError.stack = error.stack;
+        throw enhancedError;
       }
-    );
+      
+      throw error;
+    }
   }
 
   /**
@@ -66,9 +99,23 @@ export class IssuesClient extends BaseApiClient {
     projectId: string,
     issueId: string
   ): Promise<IssueResponse> {
-    return this.get(
-      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}`
-    );
+    try {
+      console.error(`[DEBUG] Getting issue ${issueId} from project ${projectId} in workspace ${workspaceSlug}`);
+      return this.get(
+        `/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}`
+      );
+    } catch (error) {
+      console.error(`[ERROR] Failed to get issue: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Add more context to the error message
+      if (error instanceof Error) {
+        const enhancedError = new Error(`Failed to get issue ${issueId} from project ${projectId} in workspace ${workspaceSlug}: ${error.message}`);
+        enhancedError.stack = error.stack;
+        throw enhancedError;
+      }
+      
+      throw error;
+    }
   }
 
   /**
@@ -84,9 +131,23 @@ export class IssuesClient extends BaseApiClient {
     issueId: string,
     data: UpdateIssueData
   ): Promise<IssueResponse> {
-    return this.patch(
-      `/api/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}`,
-      data
-    );
+    try {
+      console.error(`[DEBUG] Updating issue ${issueId} in project ${projectId} in workspace ${workspaceSlug}`);
+      return this.patch(
+        `/workspaces/${workspaceSlug}/projects/${projectId}/issues/${issueId}`,
+        data
+      );
+    } catch (error) {
+      console.error(`[ERROR] Failed to update issue: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Add more context to the error message
+      if (error instanceof Error) {
+        const enhancedError = new Error(`Failed to update issue ${issueId} in project ${projectId} in workspace ${workspaceSlug}: ${error.message}`);
+        enhancedError.stack = error.stack;
+        throw enhancedError;
+      }
+      
+      throw error;
+    }
   }
 } 

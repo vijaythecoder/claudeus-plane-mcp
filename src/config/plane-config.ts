@@ -6,7 +6,7 @@ import { PlaneConfig as PlaneConfigType, PlaneInstanceConfigSchema } from '../ap
 export interface PlaneInstance {
     name: string;
     baseUrl: string;
-    defaultWorkspace?: string;
+    defaultWorkspace: string;
     otherWorkspaces?: string[];
     apiKey: string;
 }
@@ -15,7 +15,7 @@ export interface PlaneConfig {
     [key: string]: PlaneInstance;
 }
 
-export const DEFAULT_INSTANCE = 'simhop';
+export const DEFAULT_INSTANCE = 'cateai';
 
 export async function loadInstanceConfig(): Promise<PlaneConfig> {
     const configPath = process.env.PLANE_INSTANCES_PATH || 'plane-instances.json';

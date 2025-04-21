@@ -1,5 +1,4 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { 
     ListToolsRequestSchema, 
     CallToolRequestSchema,
@@ -11,20 +10,7 @@ import {
 import { PlaneApiClient } from '../api/client.js';
 import { allTools } from '../tools/index.js';
 import { DEFAULT_INSTANCE } from '../config/plane-config.js';
-import { z } from 'zod';
 import { Tool, ToolResponse } from '../types/mcp.js';
-import { McpServer } from './server.js';
-
-interface MCPMessage {
-    jsonrpc: '2.0';
-    id?: number;
-    method?: string;
-    params?: Record<string, unknown>;
-    result?: {
-        content?: Array<{ type: string; text: string }>;
-        _meta?: Record<string, unknown>;
-    };
-}
 
 function constructResourceUri(name: string, url: string): string {
     return `plane://${name}@${new URL(url).hostname}`;
@@ -120,21 +106,22 @@ export function registerTools(server: Server, clients: Map<string, PlaneApiClien
         };
     });
 
-    // Register tool handlers
-    server.setRequestHandler(ListToolsRequestSchema, async (request) => {
-        const instance = (request.params?.instance as string) || DEFAULT_INSTANCE;
-        const client = clients.get(instance);
-        
-        if (!client) {
-            throw new Error(`Unknown instance: ${instance}`);
-        }
-
+    // Register tool handlers according to MCP standards
+    server.setRequestHandler(ListToolsRequestSchema, async () => {
+        // Return all tools with proper schema
         return {
             tools: allTools.map(tool => ({
                 name: tool.name,
                 description: tool.description,
-                status: tool.status || 'enabled',
-                inputSchema: tool.inputSchema || { type: 'object', properties: {} }
+                inputSchema: tool.inputSchema || { type: 'object', properties: {} },
+                annotations: {
+                    title: tool.name.split('__').pop()?.replace(/_/g, ' ') || tool.name,
+                    readOnlyHint: tool.name.startsWith('claudeus_plane_') && 
+                                 (tool.name.includes('__list') || tool.name.includes('__get')),
+                    destructiveHint: tool.name.includes('__delete'),
+                    idempotentHint: tool.name.includes('__update'),
+                    openWorldHint: true // All tools interact with external Plane API
+                }
             }))
         };
     });
@@ -144,22 +131,51 @@ export function registerTools(server: Server, clients: Map<string, PlaneApiClien
         const toolDef = allTools.find(t => t.name === name);
 
         if (!toolDef) {
-            throw new Error(`Tool not found: ${name}`);
+            return {
+                isError: true,
+                content: [
+                    {
+                        type: "text",
+                        text: `Error: Tool not found: ${name}`
+                    }
+                ]
+            };
         }
 
-        const instance = (args?.instance as string) || DEFAULT_INSTANCE;
-        const client = clients.get(instance);
-        if (!client) {
-            throw new Error(`Unknown instance: ${instance}`);
+        try {
+            const instance = (args?.instance as string) || DEFAULT_INSTANCE;
+            const client = clients.get(instance);
+            if (!client) {
+                return {
+                    isError: true,
+                    content: [
+                        {
+                            type: "text",
+                            text: `Error: Unknown Plane instance: ${instance}`
+                        }
+                    ]
+                };
+            }
+
+            // Pass the client instance to the tool class
+            const toolInstance = new toolDef.class(client);
+            const result = await toolInstance.execute(args || {});
+
+            return {
+                content: result.content,
+                _meta: request.params._meta
+            };
+        } catch (error) {
+            return {
+                isError: true,
+                content: [
+                    {
+                        type: "text",
+                        text: `Error executing tool ${name}: ${error instanceof Error ? error.message : String(error)}`
+                    }
+                ]
+            };
         }
-
-        const toolInstance = new toolDef.class(client);
-        const result = await toolInstance.execute(args || {});
-
-        return {
-            content: result.content,
-            _meta: request.params._meta
-        };
     });
 }
 
@@ -168,46 +184,3 @@ interface ExecutableTool extends Tool {
 }
 
 type ToolClass = new (client: PlaneApiClient) => ExecutableTool;
-
-export function setupToolHandlers(server: Server, client: PlaneApiClient): void {
-    // Register tool list handler
-    server.setRequestHandler(z.object({
-        method: z.literal('tools/list')
-    }), async () => {
-        return {
-            tools: allTools.map(tool => ({
-                name: tool.name,
-                description: tool.description,
-                inputSchema: tool.inputSchema
-            }))
-        };
-    });
-
-    // Register tool call handler
-    server.setRequestHandler(z.object({
-        method: z.literal('tools/call'),
-        params: z.object({
-            name: z.string(),
-            arguments: z.record(z.unknown()).optional(),
-            _meta: z.object({
-                progressToken: z.union([z.string(), z.number()]).optional()
-            }).optional()
-        })
-    }), async (request) => {
-        const { name, arguments: args } = request.params;
-        const toolDef = allTools.find(t => t.name === name);
-
-        if (!toolDef) {
-            throw new Error(`Tool not found: ${name}`);
-        }
-
-        const ToolClass = toolDef.class as ToolClass;
-        const toolInstance = new ToolClass(client);
-        const result = await toolInstance.execute(args || {});
-
-        return {
-            content: result.content,
-            _meta: request.params._meta
-        };
-    });
-}

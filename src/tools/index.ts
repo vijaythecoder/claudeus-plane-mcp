@@ -185,7 +185,7 @@ export const allTools: ToolWithClass[] = [
           description: 'Page number (1-based)',
           default: 1
         },
-        page_size: {
+        per_page: {
           type: 'number',
           description: 'Number of items per page',
           default: 100

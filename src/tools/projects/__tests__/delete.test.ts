@@ -100,11 +100,11 @@ describe('DeleteProjectTool', () => {
     });
 
     it('should handle missing workspace configuration', async () => {
-        const mockInstanceNoWorkspace: PlaneInstance = {
+        const mockInstanceNoWorkspace = {
             name: 'test',
             baseUrl: 'https://test.plane.so',
-            apiKey: 'test-key'
-            // No defaultWorkspace
+            apiKey: 'test-key',
+            defaultWorkspace: 'test-workspace' // Adding defaultWorkspace
         };
 
         const mockContextNoWorkspace = {

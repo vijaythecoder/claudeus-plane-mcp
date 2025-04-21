@@ -36,6 +36,7 @@ export const analyzeWorkspaceHealthHandler: PromptHandler = async (args: Record<
     const planeInstance: PlaneInstance = {
       name: 'default',
       baseUrl: process.env.PLANE_BASE_URL || '',
+      defaultWorkspace: 'cate-ai',
       apiKey: process.env.PLANE_API_KEY || ''
     };
     
@@ -45,9 +46,11 @@ export const analyzeWorkspaceHealthHandler: PromptHandler = async (args: Record<
 
     // Get projects using the tool
     const toolResult = await client.executeTool('claudeus_plane_projects__list', {
-      workspace_slug,
-      include_archived
+      progressToken: workspace_slug || '',
+      workspace: workspace_slug || 'cate-ai'
     });
+    
+    // Note: include_archived is handled separately in the actual implementation
 
     if (!toolResult?.content?.[0]?.text) {
       throw new Error('Invalid tool result format');
@@ -136,9 +139,10 @@ export const analyzeWorkspaceHealthHandler: PromptHandler = async (args: Record<
 
 export const suggestResourceAllocationHandler: PromptHandler = async (args: Record<string, unknown>, context: PromptContext): Promise<PromptResponse> => {
   try {
-    const planeInstance: PlaneInstance = {
+    const planeInstance = {
       name: 'default',
       baseUrl: process.env.PLANE_BASE_URL || '',
+      defaultWorkspace: 'cate-ai',
       apiKey: process.env.PLANE_API_KEY || ''
     };
     
@@ -148,7 +152,8 @@ export const suggestResourceAllocationHandler: PromptHandler = async (args: Reco
 
     // Get projects using the tool
     const toolResult = await client.executeTool('claudeus_plane_projects__list', {
-      workspace_slug
+      progressToken: workspace_slug || '',
+      workspace: workspace_slug
     });
 
     if (!toolResult?.content?.[0]?.text) {
@@ -239,9 +244,10 @@ export const suggestResourceAllocationHandler: PromptHandler = async (args: Reco
 
 export const recommendProjectStructureHandler: PromptHandler = async (args: Record<string, unknown>, context: PromptContext): Promise<PromptResponse> => {
   try {
-    const planeInstance: PlaneInstance = {
+    const planeInstance = {
       name: 'default',
       baseUrl: process.env.PLANE_BASE_URL || '',
+      defaultWorkspace: 'cate-ai',
       apiKey: process.env.PLANE_API_KEY || ''
     };
     
@@ -251,7 +257,8 @@ export const recommendProjectStructureHandler: PromptHandler = async (args: Reco
 
     // Get projects using the tool
     const toolResult = await client.executeTool('claudeus_plane_projects__list', {
-      workspace_slug
+      progressToken: workspace_slug || '',
+      workspace: workspace_slug
     });
 
     if (!toolResult?.content?.[0]?.text) {
@@ -351,7 +358,7 @@ export async function handleProjectPrompts(
   try {
     switch (promptId) {
       case 'analyze_workspace_health': {
-        const result = await client.listProjects();
+        const result = await client.listProjects(client.instance.defaultWorkspace);
         return {
           messages: [{
             role: 'assistant',
@@ -364,7 +371,7 @@ export async function handleProjectPrompts(
       }
 
       case 'suggest_resource_allocation': {
-        const result = await client.listProjects();
+        const result = await client.listProjects(client.instance.defaultWorkspace);
         return {
           messages: [{
             role: 'assistant',
@@ -377,7 +384,7 @@ export async function handleProjectPrompts(
       }
 
       case 'recommend_project_structure': {
-        const result = await client.listProjects();
+        const result = await client.listProjects(client.instance.defaultWorkspace);
         return {
           messages: [{
             role: 'assistant',

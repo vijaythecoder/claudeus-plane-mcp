@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { MCPTestHarness, MCPMessage, MCPContentItem } from '@/test/mcp-test-harness.js';
 import type { ProjectsResponse } from '@/dummy-data/projects.js';
-import dummyProjects from '@/dummy-data/projects.json' assert { type: 'json' };
+import dummyProjects from '@/dummy-data/projects.json' with { type: 'json' };
 
 interface MCPToolResponse extends MCPMessage {
   result?: {

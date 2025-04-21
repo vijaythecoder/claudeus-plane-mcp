@@ -29,7 +29,7 @@ async function main() {
       const planeInstance = {
         name,
         baseUrl: instance.baseUrl,
-        defaultWorkspace: instance.defaultWorkspace,
+        defaultWorkspace: instance.defaultWorkspace || 'cate-ai',
         otherWorkspaces: instance.otherWorkspaces,
         apiKey: instance.apiKey
       };
