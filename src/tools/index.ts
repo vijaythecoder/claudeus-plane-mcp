@@ -7,6 +7,11 @@ import { ListIssuesTools } from './issues/list.js';
 import { CreateIssueTool } from './issues/create.js';
 import { GetIssueTool } from './issues/get.js';
 import { UpdateIssueTool } from './issues/update.js';
+import { ListCyclesTools } from './cycles/list.js';
+import { GetCycleTool } from './cycles/get.js';
+import { CreateCycleTool } from './cycles/create.js';
+import { UpdateCycleTool } from './cycles/update.js';
+import { DeleteCycleTool } from './cycles/delete.js';
 
 // Export all tools with their classes
 export const allTools: ToolWithClass[] = [
@@ -180,15 +185,14 @@ export const allTools: ToolWithClass[] = [
           description: 'Filter archived issues',
           default: false
         },
-        page: {
-          type: 'number',
-          description: 'Page number (1-based)',
-          default: 1
-        },
         per_page: {
           type: 'number',
-          description: 'Number of items per page',
+          description: 'Number of items per page (max 100)',
           default: 100
+        },
+        cursor: {
+          type: 'string',
+          description: 'Cursor string for pagination (format: value:offset:is_prev)'
         }
       },
       required: ['project_id']
@@ -380,6 +384,185 @@ export const allTools: ToolWithClass[] = [
       required: ['project_id', 'issue_id']
     },
     class: UpdateIssueTool
+  },
+  {
+    name: 'claudeus_plane_cycles__list',
+    description: 'Lists cycles in a Plane project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace to list cycles from. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project to list cycles from'
+        },
+        owned_by: {
+          type: 'string',
+          description: 'Filter cycles by owner ID'
+        },
+        start_date: {
+          type: 'string',
+          format: 'date',
+          description: 'Filter cycles by start date (YYYY-MM-DD)'
+        },
+        end_date: {
+          type: 'string',
+          format: 'date',
+          description: 'Filter cycles by end date (YYYY-MM-DD)'
+        },
+        per_page: {
+          type: 'number',
+          description: 'Number of items per page (max 100)',
+          default: 100
+        },
+        cursor: {
+          type: 'string',
+          description: 'Cursor string for pagination'
+        }
+      },
+      required: ['project_id']
+    },
+    class: ListCyclesTools
+  },
+  {
+    name: 'claudeus_plane_cycles__get',
+    description: 'Gets a single cycle by ID from a Plane project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace containing the cycle. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the cycle'
+        },
+        cycle_id: {
+          type: 'string',
+          description: 'The ID of the cycle to retrieve'
+        }
+      },
+      required: ['project_id', 'cycle_id']
+    },
+    class: GetCycleTool
+  },
+  {
+    name: 'claudeus_plane_cycles__create',
+    description: 'Creates a new cycle in a Plane project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace to create the cycle in. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project to create the cycle in'
+        },
+        name: {
+          type: 'string',
+          description: 'The name of the cycle'
+        },
+        description: {
+          type: 'string',
+          description: 'The description of the cycle'
+        },
+        start_date: {
+          type: 'string',
+          format: 'date',
+          description: 'The start date of the cycle (YYYY-MM-DD)'
+        },
+        end_date: {
+          type: 'string',
+          format: 'date',
+          description: 'The end date of the cycle (YYYY-MM-DD)'
+        },
+        owned_by: {
+          type: 'string',
+          description: 'The ID of the user who owns the cycle'
+        }
+      },
+      required: ['project_id', 'name']
+    },
+    class: CreateCycleTool
+  },
+  {
+    name: 'claudeus_plane_cycles__update',
+    description: 'Updates an existing cycle in a Plane project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace containing the cycle. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the cycle'
+        },
+        cycle_id: {
+          type: 'string',
+          description: 'The ID of the cycle to update'
+        },
+        name: {
+          type: 'string',
+          description: 'The new name of the cycle'
+        },
+        description: {
+          type: 'string',
+          description: 'The new description of the cycle'
+        },
+        start_date: {
+          type: 'string',
+          format: 'date',
+          description: 'The new start date of the cycle (YYYY-MM-DD)'
+        },
+        end_date: {
+          type: 'string',
+          format: 'date',
+          description: 'The new end date of the cycle (YYYY-MM-DD)'
+        },
+        owned_by: {
+          type: 'string',
+          description: 'The new owner ID of the cycle'
+        }
+      },
+      required: ['project_id', 'cycle_id']
+    },
+    class: UpdateCycleTool
+  },
+  {
+    name: 'claudeus_plane_cycles__delete',
+    description: 'Deletes an existing cycle from a Plane project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace containing the cycle. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the cycle'
+        },
+        cycle_id: {
+          type: 'string',
+          description: 'The ID of the cycle to delete'
+        }
+      },
+      required: ['project_id', 'cycle_id']
+    },
+    class: DeleteCycleTool
   }
 ];
 
@@ -399,12 +582,12 @@ export const toolCapabilities = {
   claudeus_plane_issues__update: true,
   claudeus_plane_issues__delete: false, // Coming soon
   
-  // Cycles (Coming soon)
-  claudeus_plane_cycles__list: false,
-  claudeus_plane_cycles__get: false,
-  claudeus_plane_cycles__create: false,
-  claudeus_plane_cycles__update: false,
-  claudeus_plane_cycles__delete: false,
+  // Cycles
+  claudeus_plane_cycles__list: true,
+  claudeus_plane_cycles__get: true,
+  claudeus_plane_cycles__create: true,
+  claudeus_plane_cycles__update: true,
+  claudeus_plane_cycles__delete: true,
   
   // Modules (Coming soon)
   claudeus_plane_modules__list: false,

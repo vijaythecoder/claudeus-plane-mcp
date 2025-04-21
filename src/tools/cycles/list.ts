@@ -1,70 +1,39 @@
 import { Tool, ToolResponse } from '../../types/mcp.js';
-import { IssuesClient } from '../../api/issues/client.js';
-import { IssueListFilters, IssueListResponse, IssuePriority } from '../../api/issues/types.js';
+import { CyclesClient } from '../../api/cycles/client.js';
+import { CycleListFilters } from '../../api/cycles/types.js';
 import { PlaneInstanceConfig } from '../../api/types/config.js';
 
-export class ListIssuesTools implements Tool {
-  private issuesClient: IssuesClient;
+export class ListCyclesTools implements Tool {
+  private cyclesClient: CyclesClient;
   private instance: PlaneInstanceConfig;
 
-  name = 'claudeus_plane_issues__list';
-  description = 'Lists issues in a Plane project';
+  name = 'claudeus_plane_cycles__list';
+  description = 'Lists cycles in a Plane project';
   status = 'enabled' as const;
   inputSchema = {
     type: 'object',
     properties: {
       workspace_slug: {
         type: 'string',
-        description: 'The slug of the workspace to list issues from. If not provided, uses the default workspace.'
+        description: 'The slug of the workspace to list cycles from. If not provided, uses the default workspace.'
       },
       project_id: {
         type: 'string',
-        description: 'The ID of the project to list issues from'
+        description: 'The ID of the project to list cycles from'
       },
-      state: {
+      owned_by: {
         type: 'string',
-        description: 'Filter issues by state ID'
-      },
-      priority: {
-        type: 'string',
-        enum: ['urgent', 'high', 'medium', 'low', 'none'],
-        description: 'Filter issues by priority'
-      },
-      assignee: {
-        type: 'string',
-        description: 'Filter issues by assignee ID'
-      },
-      label: {
-        type: 'string',
-        description: 'Filter issues by label ID'
-      },
-      created_by: {
-        type: 'string',
-        description: 'Filter issues by creator ID'
+        description: 'Filter cycles by owner ID'
       },
       start_date: {
         type: 'string',
         format: 'date',
-        description: 'Filter issues by start date (YYYY-MM-DD)'
+        description: 'Filter cycles by start date (YYYY-MM-DD)'
       },
-      target_date: {
+      end_date: {
         type: 'string',
         format: 'date',
-        description: 'Filter issues by target date (YYYY-MM-DD)'
-      },
-      subscriber: {
-        type: 'string',
-        description: 'Filter issues by subscriber ID'
-      },
-      is_draft: {
-        type: 'boolean',
-        description: 'Filter draft issues',
-        default: false
-      },
-      archived: {
-        type: 'boolean',
-        description: 'Filter archived issues',
-        default: false
+        description: 'Filter cycles by end date (YYYY-MM-DD)'
       },
       per_page: {
         type: 'number',
@@ -73,7 +42,7 @@ export class ListIssuesTools implements Tool {
       },
       cursor: {
         type: 'string',
-        description: 'Cursor string for pagination (format: value:offset:is_prev)',
+        description: 'Cursor string for pagination'
       }
     },
     required: ['project_id']
@@ -81,26 +50,19 @@ export class ListIssuesTools implements Tool {
 
   constructor(instance: PlaneInstanceConfig) {
     this.instance = instance;
-    this.issuesClient = new IssuesClient(this.instance);
+    this.cyclesClient = new CyclesClient(this.instance);
   }
 
   async execute(args: Record<string, unknown>): Promise<ToolResponse> {
     // Log the input arguments for debugging
-    console.error(`[DEBUG] Issues list tool called with args: ${JSON.stringify(args)}`);
+    console.error(`[DEBUG] Cycles list tool called with args: ${JSON.stringify(args)}`);
     
     const input = args as {
       workspace_slug?: string;
       project_id?: string;
-      state?: string;
-      priority?: IssuePriority;
-      assignee?: string;
-      label?: string;
-      created_by?: string;
+      owned_by?: string;
       start_date?: string;
-      target_date?: string;
-      subscriber?: string;
-      is_draft?: boolean;
-      archived?: boolean;
+      end_date?: string;
       per_page?: number;
       cursor?: string;
     };
@@ -144,24 +106,18 @@ export class ListIssuesTools implements Tool {
     }
     
     console.error(`[DEBUG] Using workspace: ${workspace_slug}, project: ${project_id}`);
-    console.error(`[DEBUG] Instance details: ${JSON.stringify({
-      baseUrl: this.instance.baseUrl,
-      defaultWorkspace: this.instance.defaultWorkspace,
-      hasApiKey: !!this.instance.apiKey
-    })}`);
-
 
     try {
-      console.error(`[DEBUG] Calling issuesClient.list with workspace=${workspace_slug}, project=${project_id}`);
-      const response = await this.issuesClient.list(
+      console.error(`[DEBUG] Calling cyclesClient.list with workspace=${workspace_slug}, project=${project_id}`);
+      const response = await this.cyclesClient.list(
         workspace_slug,
         project_id,
-        filters as IssueListFilters,
+        filters as CycleListFilters,
         per_page,
         cursor
       );
 
-      console.error(`[DEBUG] Successfully retrieved issues response`);
+      console.error(`[DEBUG] Successfully retrieved cycles response`);
       return {
         content: [{
           type: 'text',
@@ -170,16 +126,16 @@ export class ListIssuesTools implements Tool {
       };
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      console.error(`[ERROR] Failed to list issues: ${errorMessage}`);
+      console.error(`[ERROR] Failed to list cycles: ${errorMessage}`);
       
       // Provide more helpful error message
-      let detailedError = `Failed to list issues: ${errorMessage}`;
+      let detailedError = `Failed to list cycles: ${errorMessage}`;
       if (errorMessage.includes('404')) {
         detailedError += `\n\nPossible reasons for 404 error:\n` +
           `1. The project ID "${project_id}" might not exist\n` +
           `2. The workspace "${workspace_slug}" might not exist\n` +
           `3. The API endpoint structure might be incorrect\n` +
-          `4. You might not have permission to access this project's issues`;
+          `4. You might not have permission to access this project's cycles`;
       }
       
       return {
@@ -191,4 +147,4 @@ export class ListIssuesTools implements Tool {
       };
     }
   }
-} 
+}

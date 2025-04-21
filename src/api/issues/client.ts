@@ -19,12 +19,15 @@ export class IssuesClient extends BaseApiClient {
     workspaceSlug: string,
     projectId: string,
     filters?: IssueListFilters,
-    page: number = 1,
-    per_page: number = 100
+    per_page: number = 100,
+    cursor?: string
   ): Promise<IssueListResponse> {
+    // Ensure per_page doesn't exceed the maximum allowed value
+    const validatedPerPage = Math.min(per_page, 100);
+    
     const queryParams = {
-      offset: ((page - 1) * per_page).toString(), // Plane uses offset-based pagination
-      per_page: per_page.toString(),
+      per_page: validatedPerPage.toString(),
+      ...(cursor && { cursor }),
       ...filters
     };
 

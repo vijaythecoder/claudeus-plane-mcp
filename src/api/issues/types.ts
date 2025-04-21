@@ -80,8 +80,16 @@ export interface IssueListFilters {
 
 // Issue List Response
 export interface IssueListResponse {
+  grouped_by: string | null;
+  sub_grouped_by: string | null;
+  total_count: number;
+  next_cursor: string;
+  prev_cursor: string;
+  next_page_results: boolean;
+  prev_page_results: boolean;
   count: number;
-  next: string | null;
-  previous: string | null;
+  total_pages: number;
+  total_results: number;
+  extra_stats: Record<string, any> | null;
   results: IssueResponse[];
 } 
