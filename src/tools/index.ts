@@ -12,6 +12,9 @@ import { GetCycleTool } from './cycles/get.js';
 import { CreateCycleTool } from './cycles/create.js';
 import { UpdateCycleTool } from './cycles/update.js';
 import { DeleteCycleTool } from './cycles/delete.js';
+import { ListCycleIssuesTools } from './cycle-issues/list.js';
+import { AddCycleIssuesTool } from './cycle-issues/add.js';
+import { RemoveCycleIssueTool } from './cycle-issues/remove.js';
 
 // Export all tools with their classes
 export const allTools: ToolWithClass[] = [
@@ -563,6 +566,89 @@ export const allTools: ToolWithClass[] = [
       required: ['project_id', 'cycle_id']
     },
     class: DeleteCycleTool
+  },
+  {
+    name: 'claudeus_plane_cycle_issues__list',
+    description: 'Lists all issues in a cycle',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the cycle'
+        },
+        cycle_id: {
+          type: 'string',
+          description: 'The ID of the cycle to list issues from'
+        }
+      },
+      required: ['project_id', 'cycle_id']
+    },
+    class: ListCycleIssuesTools
+  },
+  {
+    name: 'claudeus_plane_cycle_issues__add',
+    description: 'Adds issues to a cycle',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the cycle'
+        },
+        cycle_id: {
+          type: 'string',
+          description: 'The ID of the cycle to add issues to'
+        },
+        issue_ids: {
+          type: 'array',
+          items: {
+            type: 'string'
+          },
+          description: 'Array of issue IDs to add to the cycle'
+        }
+      },
+      required: ['project_id', 'cycle_id', 'issue_ids']
+    },
+    class: AddCycleIssuesTool
+  },
+  {
+    name: 'claudeus_plane_cycle_issues__remove',
+    description: 'Removes an issue from a cycle',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the cycle'
+        },
+        cycle_id: {
+          type: 'string',
+          description: 'The ID of the cycle to remove the issue from'
+        },
+        issue_id: {
+          type: 'string',
+          description: 'The ID of the issue to remove from the cycle'
+        }
+      },
+      required: ['project_id', 'cycle_id', 'issue_id']
+    },
+    class: RemoveCycleIssueTool
   }
 ];
 
@@ -588,6 +674,11 @@ export const toolCapabilities = {
   claudeus_plane_cycles__create: true,
   claudeus_plane_cycles__update: true,
   claudeus_plane_cycles__delete: true,
+  
+  // Cycle Issues
+  claudeus_plane_cycle_issues__list: true,
+  claudeus_plane_cycle_issues__add: true,
+  claudeus_plane_cycle_issues__remove: true,
   
   // Modules (Coming soon)
   claudeus_plane_modules__list: false,
