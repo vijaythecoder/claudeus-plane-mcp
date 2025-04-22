@@ -15,6 +15,11 @@ import { DeleteCycleTool } from './cycles/delete.js';
 import { ListCycleIssuesTools } from './cycle-issues/list.js';
 import { AddCycleIssuesTool } from './cycle-issues/add.js';
 import { RemoveCycleIssueTool } from './cycle-issues/remove.js';
+import { ListIssueCommentsTools } from './issue-comments/list.js';
+import { GetIssueCommentTool } from './issue-comments/get.js';
+import { CreateIssueCommentTool } from './issue-comments/create.js';
+import { UpdateIssueCommentTool } from './issue-comments/update.js';
+import { DeleteIssueCommentTool } from './issue-comments/delete.js';
 
 // Export all tools with their classes
 export const allTools: ToolWithClass[] = [
@@ -649,6 +654,157 @@ export const allTools: ToolWithClass[] = [
       required: ['project_id', 'cycle_id', 'issue_id']
     },
     class: RemoveCycleIssueTool
+  },
+  {
+    name: 'claudeus_plane_issue_comments__list',
+    description: 'Lists all comments for an issue',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the issue'
+        },
+        issue_id: {
+          type: 'string',
+          description: 'The ID of the issue to list comments from'
+        }
+      },
+      required: ['project_id', 'issue_id']
+    },
+    class: ListIssueCommentsTools
+  },
+  {
+    name: 'claudeus_plane_issue_comments__get',
+    description: 'Gets a single comment by ID from an issue',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the issue'
+        },
+        issue_id: {
+          type: 'string',
+          description: 'The ID of the issue containing the comment'
+        },
+        comment_id: {
+          type: 'string',
+          description: 'The ID of the comment to retrieve'
+        }
+      },
+      required: ['project_id', 'issue_id', 'comment_id']
+    },
+    class: GetIssueCommentTool
+  },
+  {
+    name: 'claudeus_plane_issue_comments__create',
+    description: 'Creates a new comment for an issue',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the issue'
+        },
+        issue_id: {
+          type: 'string',
+          description: 'The ID of the issue to add a comment to'
+        },
+        comment_html: {
+          type: 'string',
+          description: 'The HTML content of the comment'
+        },
+        access: {
+          type: 'string',
+          enum: ['INTERNAL', 'EXTERNAL'],
+          description: 'The access level of the comment (INTERNAL or EXTERNAL)',
+          default: 'INTERNAL'
+        }
+      },
+      required: ['project_id', 'issue_id', 'comment_html']
+    },
+    class: CreateIssueCommentTool
+  },
+  {
+    name: 'claudeus_plane_issue_comments__update',
+    description: 'Updates an existing comment for an issue',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the issue'
+        },
+        issue_id: {
+          type: 'string',
+          description: 'The ID of the issue containing the comment'
+        },
+        comment_id: {
+          type: 'string',
+          description: 'The ID of the comment to update'
+        },
+        comment_html: {
+          type: 'string',
+          description: 'The new HTML content of the comment'
+        },
+        access: {
+          type: 'string',
+          enum: ['INTERNAL', 'EXTERNAL'],
+          description: 'The new access level of the comment (INTERNAL or EXTERNAL)'
+        }
+      },
+      required: ['project_id', 'issue_id', 'comment_id']
+    },
+    class: UpdateIssueCommentTool
+  },
+  {
+    name: 'claudeus_plane_issue_comments__delete',
+    description: 'Deletes a comment from an issue',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the issue'
+        },
+        issue_id: {
+          type: 'string',
+          description: 'The ID of the issue containing the comment'
+        },
+        comment_id: {
+          type: 'string',
+          description: 'The ID of the comment to delete'
+        }
+      },
+      required: ['project_id', 'issue_id', 'comment_id']
+    },
+    class: DeleteIssueCommentTool
   }
 ];
 
@@ -679,6 +835,13 @@ export const toolCapabilities = {
   claudeus_plane_cycle_issues__list: true,
   claudeus_plane_cycle_issues__add: true,
   claudeus_plane_cycle_issues__remove: true,
+  
+  // Issue Comments
+  claudeus_plane_issue_comments__list: true,
+  claudeus_plane_issue_comments__get: true,
+  claudeus_plane_issue_comments__create: true,
+  claudeus_plane_issue_comments__update: true,
+  claudeus_plane_issue_comments__delete: true,
   
   // Modules (Coming soon)
   claudeus_plane_modules__list: false,
