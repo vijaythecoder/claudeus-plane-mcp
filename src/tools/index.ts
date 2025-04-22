@@ -12,14 +12,19 @@ import { GetCycleTool } from './cycles/get.js';
 import { CreateCycleTool } from './cycles/create.js';
 import { UpdateCycleTool } from './cycles/update.js';
 import { DeleteCycleTool } from './cycles/delete.js';
-import { ListCycleIssuesTools } from './cycle-issues/list.js';
-import { AddCycleIssuesTool } from './cycle-issues/add.js';
-import { RemoveCycleIssueTool } from './cycle-issues/remove.js';
-import { ListIssueCommentsTools } from './issue-comments/list.js';
-import { GetIssueCommentTool } from './issue-comments/get.js';
-import { CreateIssueCommentTool } from './issue-comments/create.js';
-import { UpdateIssueCommentTool } from './issue-comments/update.js';
-import { DeleteIssueCommentTool } from './issue-comments/delete.js';
+import { AddCycleIssuesTool } from "./cycle-issues/add.js";
+import { ListCycleIssuesTools } from "./cycle-issues/list.js";
+import { RemoveCycleIssueTool } from "./cycle-issues/remove.js";
+import { CreateIssueCommentTool } from "./issue-comments/create.js";
+import { DeleteIssueCommentTool } from "./issue-comments/delete.js";
+import { GetIssueCommentTool } from "./issue-comments/get.js";
+import { ListIssueCommentsTools } from "./issue-comments/list.js";
+import { UpdateIssueCommentTool } from "./issue-comments/update.js";
+import { CreateLabelTool } from "./labels/create.js";
+import { DeleteLabelTool } from "./labels/delete.js";
+import { GetLabelTool } from "./labels/get.js";
+import { ListLabelsTools } from "./labels/list.js";
+import { UpdateLabelTool } from "./labels/update.js";
 
 // Export all tools with their classes
 export const allTools: ToolWithClass[] = [
@@ -805,6 +810,150 @@ export const allTools: ToolWithClass[] = [
       required: ['project_id', 'issue_id', 'comment_id']
     },
     class: DeleteIssueCommentTool
+  },
+  {
+    name: 'claudeus_plane_labels__list',
+    description: 'Lists all labels in a project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project to list labels from'
+        }
+      },
+      required: ['project_id']
+    },
+    class: ListLabelsTools
+  },
+  {
+    name: 'claudeus_plane_labels__get',
+    description: 'Gets a single label by ID',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the label'
+        },
+        label_id: {
+          type: 'string',
+          description: 'The ID of the label to retrieve'
+        }
+      },
+      required: ['project_id', 'label_id']
+    },
+    class: GetLabelTool
+  },
+  {
+    name: 'claudeus_plane_labels__create',
+    description: 'Creates a new label in a project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project to create the label in'
+        },
+        name: {
+          type: 'string',
+          description: 'The name of the label'
+        },
+        description: {
+          type: 'string',
+          description: 'The description of the label'
+        },
+        color: {
+          type: 'string',
+          description: 'The color of the label as a hex code'
+        },
+        parent: {
+          type: 'string',
+          description: 'The ID of the parent label'
+        }
+      },
+      required: ['project_id', 'name']
+    },
+    class: CreateLabelTool
+  },
+  {
+    name: 'claudeus_plane_labels__update',
+    description: 'Updates an existing label',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the label'
+        },
+        label_id: {
+          type: 'string',
+          description: 'The ID of the label to update'
+        },
+        name: {
+          type: 'string',
+          description: 'The new name of the label'
+        },
+        description: {
+          type: 'string',
+          description: 'The new description of the label'
+        },
+        color: {
+          type: 'string',
+          description: 'The new color of the label as a hex code'
+        },
+        parent: {
+          type: 'string',
+          description: 'The new parent label ID, or null to remove parent'
+        }
+      },
+      required: ['project_id', 'label_id']
+    },
+    class: UpdateLabelTool
+  },
+  {
+    name: 'claudeus_plane_labels__delete',
+    description: 'Deletes a label from a project',
+    status: 'enabled',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        workspace_slug: {
+          type: 'string',
+          description: 'The slug of the workspace. If not provided, uses the default workspace.'
+        },
+        project_id: {
+          type: 'string',
+          description: 'The ID of the project containing the label'
+        },
+        label_id: {
+          type: 'string',
+          description: 'The ID of the label to delete'
+        }
+      },
+      required: ['project_id', 'label_id']
+    },
+    class: DeleteLabelTool
   }
 ];
 
